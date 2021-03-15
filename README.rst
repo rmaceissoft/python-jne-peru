@@ -3,7 +3,7 @@ Python JNE Peru
 ===============
 
 
-.. image:: https://img.shields.io/pypi/v/pyjne_peru.svg
+.. image:: https://img.shields.io/pypi/v/python-jne-peru.svg
         :target: https://pypi.python.org/pypi/python-jne-peru
 
 .. image:: https://img.shields.io/travis/rmaceissoft/pyjne_peru.svg

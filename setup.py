@@ -25,7 +25,9 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
     ],
-    description="Python Boilerplate contains all the boilerplate you need to create a Python package.",
+    description="Librería de python para facilitar el acceso a la información pública "
+                "relativa a los procesos electorales de la plataforma del "
+                "JNE https://plataformaelectoral.jne.gob.pe/.",
     install_requires=[
         'requests'
     ],

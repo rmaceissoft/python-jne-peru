@@ -9,10 +9,6 @@ Python JNE Peru
 .. image:: https://img.shields.io/travis/rmaceissoft/pyjne_peru.svg
         :target: https://travis-ci.com/rmaceissoft/python-jne-peru
 
-.. image:: https://readthedocs.org/projects/pyjne-peru/badge/?version=latest
-        :target: https://python-jne-peru.readthedocs.io/en/latest/?version=latest
-        :alt: Documentation Status
-
 
 
 
@@ -21,7 +17,6 @@ electorales de la plataforma del JNE https://plataformaelectoral.jne.gob.pe/.
 
 
 * Free software: GNU General Public License v3
-* Documentation: https://python-jne-peru.readthedocs.io.
 
 
 Instalar

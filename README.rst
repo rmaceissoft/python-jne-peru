@@ -24,6 +24,13 @@ electorales de la plataforma del JNE https://plataformaelectoral.jne.gob.pe/.
 * Documentation: https://python-jne-peru.readthedocs.io.
 
 
+Instalar
+--------
+
+.. code-block::
+
+    pip install python-jne-peru
+
 Ejemplos de uso
 -----------------
 

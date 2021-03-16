@@ -200,3 +200,17 @@ class EntityFactory:
     file_extended = FileExtended
     candidate = Candidate
     resume = Resume
+    personal_info = PersonalInfo
+    penal_sentence = PenalSentence
+    university_education = UniversityEducation
+    postgraduate_education = PostgraduateEducation
+    obligation_sentence = ObligationSentence
+    immovable_property = ImmovableProperty
+    movable_property = MovableProperty
+    basic_education = BasicEducation
+    non_university_education = NonUniversityEducation
+    technical_education = TechnicalEducation
+    additional_information = AdditionalInformation
+    professional_experience = ProfessionalExperience
+    partisan_position = PartisanPosition
+    resignation_political_organization = ResignationPoliticalOrganization

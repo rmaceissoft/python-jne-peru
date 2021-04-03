@@ -5,9 +5,25 @@ class ResultSet(list):
     pass
 
 
+class ResultSetWithEmptyItems(ResultSet):
+
+    def __init__(self, empty_item_comparison_attribute, empty_item_comparison_value):
+        self.empty_item_comparison_attribute = empty_item_comparison_attribute
+        self.empty_item_comparison_value = empty_item_comparison_value
+
+    @property
+    def exclude_empty_item(self):
+        return [item for item in self if getattr(item, self.empty_item_comparison_attribute) != self.empty_item_comparison_value]
+
+
 class Entity:
 
-    result_set_class = ResultSet
+    @classmethod
+    def get_result_set_class_instance(cls):
+        if hasattr(cls, 'empty_item_comparison_attribute') and hasattr(cls, 'empty_item_comparison_value'):
+            return ResultSetWithEmptyItems(
+                cls.empty_item_comparison_attribute, cls.empty_item_comparison_value)
+        return ResultSet()
 
     def __getstate__(self):
         # pickle
@@ -16,7 +32,7 @@ class Entity:
 
     def __getattr__(self, name):
         """
-        invoken when refering to attribute that it is not valid or it was not present at json response
+        invoken when referring to attribute that it is not valid or it was not present at json response
         """
         return None
 
@@ -34,7 +50,7 @@ class Entity:
 
     @classmethod
     def parse_list(cls, json):
-        results = cls.result_set_class()
+        results = cls.get_result_set_class_instance()
         total = 0
         items = json or []
         for obj in items:
@@ -45,23 +61,25 @@ class Entity:
         return results
 
 
-class ElectionProcessResultSet(ResultSet):
+class ElectionProcess(Entity):
+    empty_item_comparison_attribute = "idProcesoElectoral"
+    empty_item_comparison_value = 0
 
     @property
-    def exclude_empty_item(self):
-        return [item for item in self if item.idProcesoElectoral != 0]
+    def fechaAperturaProceso(self):
+        return parse_date(self.strFechaAperturaProceso)
 
+    @property
+    def fechaConvocatoria(self):
+        return parse_date(self.strFechaConvocatoria)
 
-class ElectionProcess(Entity):
+    @property
+    def fechaCierreProceso(self):
+        return parse_date(self.strFechaCierreProceso)
 
-    result_set_class = ElectionProcessResultSet
-    extra_parsers = {
-        'strFechaAperturaProceso': parse_date,
-        'strFechaConvocatoria': parse_date,
-        'strFechaCierreProceso': parse_date,
-        'strFechaRegistro': lambda v: parse_datetime(
-            v, format="%d/%m/%Y %H:%M:%S %p"),
-    }
+    @property
+    def fechaRegistro(self):
+        return parse_datetime(self.strFechaRegistro, format="%d/%m/%Y %H:%M:%S %p")
 
 
 class ElectionType(Entity):
@@ -74,11 +92,9 @@ class ElectoralDistrict(Entity):
 
 class Candidate(Entity):
 
-    extra_parsers = {
-        'strFechaNacimiento': lambda v: parse_datetime(
-            v, format="%d/%m/%Y %H:%M:%S %p"),
-    }
-    pass
+    @property
+    def fechaNacimiento(self):
+        return parse_datetime(self.strFechaNacimiento, format="%d/%m/%Y %H:%M:%S %p")
 
 
 class ProceduralPart(Entity):
@@ -112,7 +128,8 @@ class MovableProperty(Entity):
 
 
 class ImmovableProperty(Entity):
-    pass
+    empty_item_comparison_attribute = "strTengoInmueble"
+    empty_item_comparison_value = "2"
 
 
 class BasicEducation(Entity):
@@ -120,11 +137,35 @@ class BasicEducation(Entity):
 
 
 class PartisanPosition(Entity):
-    pass
+    empty_item_comparison_attribute = "strTengoCargoPartidario"
+    empty_item_comparison_value = "2"
+
+    @property
+    def anioCargoPartiDesde(self):
+        try:
+            value = int(self.strAnioCargoPartiDesde)
+        except ValueError:
+            value = None
+        return value
+
+    @property
+    def anioCargoPartiHasta(self):
+        try:
+            value = int(self.strAnioCargoPartiHasta)
+        except ValueError:
+            value = None
+        return value
 
 
 class UniversityEducation(Entity):
-    pass
+
+    @property
+    def anioBachiller(self):
+        try:
+            value = int(self.strAnioBachiller)
+        except ValueError:
+            value = None
+        return value
 
 
 class NonUniversityEducation(Entity):
@@ -132,7 +173,14 @@ class NonUniversityEducation(Entity):
 
 
 class PostgraduateEducation(Entity):
-    pass
+
+    @property
+    def anioPosgrado(self):
+        try:
+            value = int(self.strAnioPosgrado)
+        except ValueError:
+            value = None
+        return value
 
 
 class TechnicalEducation(Entity):
@@ -140,7 +188,27 @@ class TechnicalEducation(Entity):
 
 
 class ProfessionalExperience(Entity):
-    pass
+    empty_item_comparison_attribute = "strTengoExpeLaboral"
+    empty_item_comparison_value = "2"
+
+    @property
+    def anioTrabajoDesde(self):
+        try:
+            value = int(self.strAnioTrabajoDesde)
+        except ValueError:
+            value = None
+        return value
+
+    @property
+    def anioTrabajoHasta(self):
+        try:
+            value = int(self.strAnioTrabajoHasta)
+            if value == 0:
+                # '0000' is handled as None
+                value = None
+        except ValueError:
+            value = None
+        return value
 
 
 class ResignationPoliticalOrganization(Entity):
@@ -148,19 +216,28 @@ class ResignationPoliticalOrganization(Entity):
 
 
 class ObligationSentence(Entity):
-    pass
+    empty_item_comparison_attribute = "strTengoSentenciaObliga"
+    empty_item_comparison_value = "2"
 
 
 class PenalSentence(Entity):
-    pass
+    empty_item_comparison_attribute = "strTengoSentenciaPenal"
+    empty_item_comparison_value = "2"
+
+    @property
+    def fechaSentenciaPenal(self):
+        return parse_date(self.strFechaSentenciaPenal)
 
 
 class PersonalInfo(Entity):
 
-    extra_parsers = {
-        'strFeTerminoRegistro': parse_datetime,
-        'strFechaNacimiento': parse_date
-    }
+    @property
+    def feTerminoRegistro(self):
+        return parse_datetime(self.strFeTerminoRegistro)
+
+    @property
+    def fechaNacimiento(self):
+        return parse_date(self.strFechaNacimiento)
 
 
 class AdditionalInformation(Entity):
@@ -168,7 +245,10 @@ class AdditionalInformation(Entity):
 
 
 class Income(Entity):
-    pass
+
+    @property
+    def is_empty(self):
+        return self.strTengoIngresos == "2"
 
 
 class Resume(Entity):

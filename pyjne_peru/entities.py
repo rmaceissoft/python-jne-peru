@@ -39,6 +39,8 @@ class Entity:
     @classmethod
     def parse(cls, json):
         """Parse a JSON object into an entity instance."""
+        if not json:
+            return None
         instance = cls()
         for k, v in json.items():
             if hasattr(cls, 'extra_parsers') and k in cls.extra_parsers:
@@ -169,7 +171,10 @@ class UniversityEducation(Entity):
 
 
 class NonUniversityEducation(Entity):
-    pass
+
+    @property
+    def tengoNoUniversitaria(self):
+        return self.strTengoNoUniversitaria == "1"
 
 
 class PostgraduateEducation(Entity):
@@ -184,7 +189,10 @@ class PostgraduateEducation(Entity):
 
 
 class TechnicalEducation(Entity):
-    pass
+
+    @property
+    def tengoEduTecnico(self):
+        return self.strTengoEduTecnico == "1"
 
 
 class ProfessionalExperience(Entity):

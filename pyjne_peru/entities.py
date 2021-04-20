@@ -1,13 +1,21 @@
+from typing import Any, Dict, Optional, Type, TypeVar, Union
+
 from .utils import parse_date, parse_datetime
 
 
+TEntity = TypeVar('TEntity', bound='Entity')
+
+
 class ResultSet(list):
-    pass
+
+    def __init__(self):
+        self.total = 0
 
 
 class ResultSetWithEmptyItems(ResultSet):
 
-    def __init__(self, empty_item_comparison_attribute, empty_item_comparison_value):
+    def __init__(self, empty_item_comparison_attribute: str, empty_item_comparison_value: Union[str, int]):
+        super().__init__()
         self.empty_item_comparison_attribute = empty_item_comparison_attribute
         self.empty_item_comparison_value = empty_item_comparison_value
 
@@ -16,13 +24,22 @@ class ResultSetWithEmptyItems(ResultSet):
         return [item for item in self if getattr(item, self.empty_item_comparison_attribute) != self.empty_item_comparison_value]
 
 
+# TODO: Find a better way to do this
+TResultSets = Union[ResultSet, ResultSetWithEmptyItems]
+
+
 class Entity:
+    empty_item_comparison_attribute: Optional[str] = None
+    empty_item_comparison_value: Union[str, int, None] = None
+    extra_parsers: Optional[Dict[str, Any]] = None
 
     @classmethod
-    def get_result_set_class_instance(cls):
-        if hasattr(cls, 'empty_item_comparison_attribute') and hasattr(cls, 'empty_item_comparison_value'):
+    def get_result_set_class_instance(cls: Type[TEntity]) -> TResultSets:
+        if cls.empty_item_comparison_attribute and cls.empty_item_comparison_value:
             return ResultSetWithEmptyItems(
-                cls.empty_item_comparison_attribute, cls.empty_item_comparison_value)
+                cls.empty_item_comparison_attribute,
+                cls.empty_item_comparison_value
+            )
         return ResultSet()
 
     def __getstate__(self):
@@ -37,13 +54,13 @@ class Entity:
         return None
 
     @classmethod
-    def parse(cls, json):
+    def parse(cls: Type[TEntity], json: dict) -> Optional[TEntity]:
         """Parse a JSON object into an entity instance."""
         if not json:
             return None
         instance = cls()
         for k, v in json.items():
-            if hasattr(cls, 'extra_parsers') and k in cls.extra_parsers:
+            if cls.extra_parsers and k in cls.extra_parsers:
                 func = cls.extra_parsers[k]
                 setattr(instance, k, func(v))
             else:
@@ -51,15 +68,14 @@ class Entity:
         return instance
 
     @classmethod
-    def parse_list(cls, json):
+    def parse_list(cls: Type[TEntity], json: dict) -> TResultSets:
         results = cls.get_result_set_class_instance()
-        total = 0
-        items = json or []
+        items: Union[dict, list] = json or []
         for obj in items:
             results.append(cls.parse(obj))
-            total += 1
+            results.total += 1
         # hold the count of items
-        results.total = total
+        # results.total = total
         return results
 
 
